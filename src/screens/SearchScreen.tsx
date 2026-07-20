@@ -12,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { palette, serifFont, spineColorFor } from '../colors';
+import { spineColorFromCover } from '../coverColor';
 import { searchBooks } from '../googleBooks';
 import { RootStackParamList } from '../navigation';
 import { useBooks } from '../store';
@@ -30,7 +31,7 @@ export default function SearchScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searched, setSearched] = useState(false);
-  const { books, addBook } = useBooks();
+  const { books, addBook, updateBook } = useBooks();
   const navigation = useNavigation<Nav>();
 
   const onSearch = async () => {
@@ -62,6 +63,12 @@ export default function SearchScreen() {
       spineColor: spineColorFor(result.title),
     };
     addBook(book);
+    if (book.coverUrl) {
+      // 表紙の代表色を抽出して背表紙に反映(失敗時はタイトル由来の色のまま)
+      spineColorFromCover(book.coverUrl).then((color) => {
+        if (color) updateBook(book.id, { spineColor: color });
+      });
+    }
     navigation.navigate('BookDetail', { bookId: book.id });
   };
 
