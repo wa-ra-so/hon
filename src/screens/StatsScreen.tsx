@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { palette } from '../colors';
+import { palette, serifFont } from '../colors';
 import { useBooks } from '../store';
 
 function lastMonths(n: number): string[] {
@@ -43,11 +43,14 @@ export default function StatsScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <Text style={styles.overline}>READING RECORD</Text>
+      <Text style={styles.title}>読書の記録</Text>
+
       <View style={styles.tiles}>
-        <StatTile label="ぜんぶで" value={`${books.length}冊`} />
-        <StatTile label="今年" value={`${stats.thisYear}冊`} />
-        <StatTile label="お気に入り" value={`${stats.favorites}冊`} />
-        <StatTile label="平均評価" value={`★${stats.avgRating}`} />
+        <StatTile label="蔵書" value={String(books.length)} unit="冊" />
+        <StatTile label="今年" value={String(stats.thisYear)} unit="冊" />
+        <StatTile label="お気に入り" value={String(stats.favorites)} unit="冊" />
+        <StatTile label="平均評価" value={stats.avgRating} unit="" />
       </View>
 
       <Text style={styles.sectionTitle}>月ごとの読了数（直近12か月）</Text>
@@ -58,11 +61,11 @@ export default function StatsScreen() {
             <View
               style={[
                 styles.bar,
-                { height: Math.max(4, (count / stats.maxMonthly) * 120) },
+                { height: Math.max(3, (count / stats.maxMonthly) * 110) },
                 count === 0 && styles.barEmpty,
               ]}
             />
-            <Text style={styles.barLabel}>{Number(month.slice(5))}月</Text>
+            <Text style={styles.barLabel}>{Number(month.slice(5))}</Text>
           </View>
         ))}
       </View>
@@ -71,13 +74,9 @@ export default function StatsScreen() {
       <View style={styles.ratingList}>
         {stats.ratingDist.map(({ rating, count }) => (
           <View key={rating} style={styles.ratingRow}>
-            <Text style={styles.ratingLabel}>
-              {'★'.repeat(rating)}
-            </Text>
+            <Text style={styles.ratingLabel}>{'★'.repeat(rating)}</Text>
             <View style={styles.ratingBarTrack}>
-              <View
-                style={[styles.ratingBar, { flex: count / stats.maxRating }]}
-              />
+              <View style={[styles.ratingBar, { flex: count / stats.maxRating }]} />
               <View style={{ flex: 1 - count / stats.maxRating }} />
             </View>
             <Text style={styles.ratingCount}>{count}</Text>
@@ -88,10 +87,13 @@ export default function StatsScreen() {
   );
 }
 
-function StatTile({ label, value }: { label: string; value: string }) {
+function StatTile({ label, value, unit }: { label: string; value: string; unit: string }) {
   return (
     <View style={styles.tile}>
-      <Text style={styles.tileValue}>{value}</Text>
+      <Text style={styles.tileValue}>
+        {value}
+        {unit ? <Text style={styles.tileUnit}> {unit}</Text> : null}
+      </Text>
       <Text style={styles.tileLabel}>{label}</Text>
     </View>
   );
@@ -103,8 +105,21 @@ const styles = StyleSheet.create({
     backgroundColor: palette.background,
   },
   content: {
-    padding: 16,
-    paddingBottom: 40,
+    padding: 20,
+    paddingBottom: 48,
+  },
+  overline: {
+    color: palette.accent,
+    fontSize: 10,
+    letterSpacing: 4,
+    marginBottom: 6,
+  },
+  title: {
+    fontSize: 24,
+    color: palette.text,
+    fontFamily: serifFont,
+    fontWeight: '600',
+    marginBottom: 20,
   },
   tiles: {
     flexDirection: 'row',
@@ -113,35 +128,47 @@ const styles = StyleSheet.create({
   },
   tile: {
     backgroundColor: palette.card,
-    borderRadius: 14,
-    paddingVertical: 16,
+    borderWidth: 1,
+    borderColor: palette.cardBorder,
+    borderRadius: 6,
+    paddingVertical: 18,
     alignItems: 'center',
     flexBasis: '47%',
     flexGrow: 1,
   },
   tileValue: {
-    fontSize: 22,
-    fontWeight: '800',
+    fontSize: 26,
     color: palette.text,
+    fontFamily: serifFont,
+    fontWeight: '600',
+  },
+  tileUnit: {
+    fontSize: 13,
+    color: palette.textMuted,
   },
   tileLabel: {
-    fontSize: 12,
+    fontSize: 11,
     color: palette.textMuted,
-    marginTop: 4,
+    marginTop: 6,
+    letterSpacing: 2,
   },
   sectionTitle: {
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 13,
     color: palette.text,
-    marginTop: 28,
+    fontFamily: serifFont,
+    fontWeight: '600',
+    marginTop: 30,
     marginBottom: 12,
+    letterSpacing: 1,
   },
   chart: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     backgroundColor: palette.card,
-    borderRadius: 14,
-    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: palette.cardBorder,
+    borderRadius: 6,
+    paddingVertical: 16,
     paddingHorizontal: 8,
   },
   barColumn: {
@@ -150,12 +177,12 @@ const styles = StyleSheet.create({
   },
   barCount: {
     fontSize: 10,
-    color: palette.textMuted,
-    marginBottom: 2,
+    color: palette.accent,
+    marginBottom: 3,
   },
   bar: {
-    width: 12,
-    borderRadius: 6,
+    width: 10,
+    borderRadius: 2,
     backgroundColor: palette.accent,
   },
   barEmpty: {
@@ -163,38 +190,41 @@ const styles = StyleSheet.create({
   },
   barLabel: {
     fontSize: 10,
-    color: palette.textMuted,
-    marginTop: 4,
+    color: palette.textFaint,
+    marginTop: 6,
   },
   ratingList: {
     backgroundColor: palette.card,
-    borderRadius: 14,
-    padding: 14,
-    gap: 10,
+    borderWidth: 1,
+    borderColor: palette.cardBorder,
+    borderRadius: 6,
+    padding: 16,
+    gap: 12,
   },
   ratingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 12,
   },
   ratingLabel: {
-    width: 80,
+    width: 78,
     color: palette.star,
-    fontSize: 13,
+    fontSize: 12,
+    letterSpacing: 1,
   },
   ratingBarTrack: {
     flex: 1,
     flexDirection: 'row',
-    height: 10,
+    height: 8,
   },
   ratingBar: {
-    backgroundColor: palette.star,
-    borderRadius: 5,
+    backgroundColor: palette.accentDim,
+    borderRadius: 4,
   },
   ratingCount: {
     width: 24,
     textAlign: 'right',
     color: palette.textMuted,
-    fontSize: 13,
+    fontSize: 12,
   },
 });

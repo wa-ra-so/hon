@@ -11,7 +11,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { palette, spineColorFor } from '../colors';
+import { palette, serifFont, spineColorFor } from '../colors';
 import { searchBooks } from '../googleBooks';
 import { RootStackParamList } from '../navigation';
 import { useBooks } from '../store';
@@ -69,11 +69,15 @@ export default function SearchScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.headerArea}>
+        <Text style={styles.overline}>FIND A BOOK</Text>
+        <Text style={styles.title}>本をさがす</Text>
+      </View>
       <View style={styles.searchRow}>
         <TextInput
           style={styles.input}
           placeholder="タイトルや著者名で検索"
-          placeholderTextColor={palette.textMuted}
+          placeholderTextColor={palette.textFaint}
           value={query}
           onChangeText={setQuery}
           onSubmitEditing={onSearch}
@@ -88,6 +92,7 @@ export default function SearchScreen() {
       <FlatList
         data={results}
         keyExtractor={(item) => item.googleId}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListEmptyComponent={
           !loading && searched ? (
             <Text style={styles.emptyText}>見つかりませんでした</Text>
@@ -101,7 +106,7 @@ export default function SearchScreen() {
                 <Image source={{ uri: item.coverUrl }} style={styles.thumb} />
               ) : (
                 <View style={[styles.thumb, styles.thumbPlaceholder]}>
-                  <Text style={styles.thumbPlaceholderText}>📕</Text>
+                  <Text style={styles.thumbPlaceholderText}>本</Text>
                 </View>
               )}
               <View style={styles.resultInfo}>
@@ -110,7 +115,7 @@ export default function SearchScreen() {
                 </Text>
                 <Text style={styles.resultAuthors} numberOfLines={1}>
                   {item.authors.join('、') || '著者不明'}
-                  {item.publishedDate ? ` ・ ${item.publishedDate.slice(0, 4)}` : ''}
+                  {item.publishedDate ? `　${item.publishedDate.slice(0, 4)}` : ''}
                 </Text>
               </View>
               <Pressable
@@ -134,78 +139,109 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: palette.background,
   },
+  headerArea: {
+    paddingHorizontal: 20,
+    paddingTop: 14,
+  },
+  overline: {
+    color: palette.accent,
+    fontSize: 10,
+    letterSpacing: 4,
+    marginBottom: 6,
+  },
+  title: {
+    fontSize: 24,
+    color: palette.text,
+    fontFamily: serifFont,
+    fontWeight: '600',
+  },
   searchRow: {
     flexDirection: 'row',
-    padding: 16,
-    gap: 8,
+    padding: 20,
+    paddingBottom: 12,
+    gap: 10,
   },
   input: {
     flex: 1,
     backgroundColor: palette.card,
-    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: palette.cardBorder,
+    borderRadius: 4,
     paddingHorizontal: 14,
-    paddingVertical: 10,
-    fontSize: 16,
+    paddingVertical: 11,
+    fontSize: 15,
     color: palette.text,
   },
   searchButton: {
-    backgroundColor: palette.accent,
-    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: palette.accentDim,
+    borderRadius: 4,
     paddingHorizontal: 18,
     justifyContent: 'center',
   },
   searchButtonText: {
-    color: '#fff',
-    fontWeight: '700',
+    color: palette.accent,
+    letterSpacing: 2,
+    fontSize: 13,
   },
   loading: {
     marginTop: 16,
   },
   error: {
-    color: palette.accent,
-    paddingHorizontal: 16,
+    color: palette.danger,
+    paddingHorizontal: 20,
   },
   emptyText: {
     color: palette.textMuted,
     textAlign: 'center',
     marginTop: 32,
   },
+  separator: {
+    height: 1,
+    backgroundColor: palette.cardBorder,
+    marginLeft: 20,
+  },
   resultRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    gap: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    gap: 14,
   },
   thumb: {
-    width: 48,
-    height: 68,
-    borderRadius: 4,
-    backgroundColor: palette.shelfBack,
+    width: 46,
+    height: 66,
+    borderRadius: 2,
+    backgroundColor: palette.card,
   },
   thumbPlaceholder: {
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: palette.cardBorder,
   },
   thumbPlaceholderText: {
-    fontSize: 22,
+    color: palette.textMuted,
+    fontFamily: serifFont,
+    fontSize: 16,
   },
   resultInfo: {
     flex: 1,
   },
   resultTitle: {
     fontSize: 15,
-    fontWeight: '600',
     color: palette.text,
+    fontFamily: serifFont,
+    fontWeight: '600',
   },
   resultAuthors: {
-    fontSize: 13,
+    fontSize: 12,
     color: palette.textMuted,
-    marginTop: 2,
+    marginTop: 3,
   },
   addButton: {
-    borderWidth: 1.5,
-    borderColor: palette.accent,
+    borderWidth: 1,
+    borderColor: palette.accentDim,
     borderRadius: 16,
     paddingHorizontal: 14,
     paddingVertical: 6,
@@ -215,9 +251,10 @@ const styles = StyleSheet.create({
   },
   addButtonText: {
     color: palette.accent,
-    fontWeight: '700',
+    fontSize: 12,
+    letterSpacing: 1,
   },
   addButtonTextDone: {
-    color: palette.textMuted,
+    color: palette.textFaint,
   },
 });

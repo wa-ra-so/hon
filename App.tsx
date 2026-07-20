@@ -1,10 +1,9 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
+import { DarkTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { Text } from 'react-native';
-import { palette } from './src/colors';
+import { palette, serifFont } from './src/colors';
 import { RootStackParamList, TabParamList } from './src/navigation';
 import BookDetailScreen from './src/screens/BookDetailScreen';
 import SearchScreen from './src/screens/SearchScreen';
@@ -16,19 +15,16 @@ const Tab = createBottomTabNavigator<TabParamList>();
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const theme = {
-  ...DefaultTheme,
+  ...DarkTheme,
   colors: {
-    ...DefaultTheme.colors,
+    ...DarkTheme.colors,
     background: palette.background,
-    card: palette.card,
+    card: palette.backgroundDeep,
     text: palette.text,
+    border: palette.cardBorder,
     primary: palette.accent,
   },
 };
-
-function TabIcon({ emoji, focused }: { emoji: string; focused: boolean }) {
-  return <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.45 }}>{emoji}</Text>;
-}
 
 function Tabs() {
   return (
@@ -36,33 +32,20 @@ function Tabs() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: palette.accent,
-        tabBarInactiveTintColor: palette.textMuted,
+        tabBarInactiveTintColor: palette.textFaint,
+        tabBarStyle: {
+          backgroundColor: palette.backgroundDeep,
+          borderTopColor: palette.cardBorder,
+        },
+        tabBarIcon: () => null,
+        tabBarIconStyle: { display: 'none' },
+        tabBarItemStyle: { justifyContent: 'center' },
+        tabBarLabelStyle: { fontSize: 12, letterSpacing: 3 },
       }}
     >
-      <Tab.Screen
-        name="Shelf"
-        component={ShelfScreen}
-        options={{
-          title: '本棚',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="📚" focused={focused} />,
-        }}
-      />
-      <Tab.Screen
-        name="Search"
-        component={SearchScreen}
-        options={{
-          title: '検索',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="🔍" focused={focused} />,
-        }}
-      />
-      <Tab.Screen
-        name="Stats"
-        component={StatsScreen}
-        options={{
-          title: '統計',
-          tabBarIcon: ({ focused }) => <TabIcon emoji="📊" focused={focused} />,
-        }}
-      />
+      <Tab.Screen name="Shelf" component={ShelfScreen} options={{ title: '本棚' }} />
+      <Tab.Screen name="Search" component={SearchScreen} options={{ title: 'さがす' }} />
+      <Tab.Screen name="Stats" component={StatsScreen} options={{ title: '記録' }} />
     </Tab.Navigator>
   );
 }
@@ -76,10 +59,16 @@ export default function App() {
           <Stack.Screen
             name="BookDetail"
             component={BookDetailScreen}
-            options={{ title: '本の記録', headerBackTitle: '戻る' }}
+            options={{
+              title: '本の記録',
+              headerBackTitle: '戻る',
+              headerStyle: { backgroundColor: palette.backgroundDeep },
+              headerTitleStyle: { fontFamily: serifFont, fontSize: 16 },
+              headerTintColor: palette.text,
+            }}
           />
         </Stack.Navigator>
-        <StatusBar style="dark" />
+        <StatusBar style="light" />
       </NavigationContainer>
     </BooksProvider>
   );

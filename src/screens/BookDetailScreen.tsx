@@ -14,7 +14,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { palette } from '../colors';
+import { palette, serifFont } from '../colors';
 import Stars from '../components/Stars';
 import { RootStackParamList } from '../navigation';
 import { useBooks } from '../store';
@@ -61,9 +61,11 @@ export default function BookDetailScreen() {
             <Image source={{ uri: book.coverUrl }} style={styles.cover} resizeMode="cover" />
           ) : (
             <View style={[styles.cover, { backgroundColor: book.spineColor }]}>
-              <Text style={styles.coverPlaceholderText} numberOfLines={5}>
-                {book.title}
-              </Text>
+              <View style={styles.coverPlaceholderFrame}>
+                <Text style={styles.coverPlaceholderText} numberOfLines={5}>
+                  {book.title}
+                </Text>
+              </View>
             </View>
           )}
         </View>
@@ -71,6 +73,7 @@ export default function BookDetailScreen() {
         {book.authors.length > 0 && (
           <Text style={styles.authors}>{book.authors.join('、')}</Text>
         )}
+        <View style={styles.divider} />
 
         <View style={styles.section}>
           <Text style={styles.label}>評価</Text>
@@ -85,7 +88,8 @@ export default function BookDetailScreen() {
           <Switch
             value={book.favorite}
             onValueChange={(favorite) => updateBook(book.id, { favorite })}
-            trackColor={{ true: palette.accent }}
+            trackColor={{ true: palette.accentDim, false: palette.card }}
+            thumbColor={book.favorite ? palette.accent : palette.textFaint}
           />
         </View>
 
@@ -96,7 +100,7 @@ export default function BookDetailScreen() {
             value={book.finishedAt ?? ''}
             onChangeText={(finishedAt) => updateBook(book.id, { finishedAt })}
             placeholder="2026-07"
-            placeholderTextColor={palette.textMuted}
+            placeholderTextColor={palette.textFaint}
             keyboardType="numbers-and-punctuation"
           />
         </View>
@@ -108,7 +112,7 @@ export default function BookDetailScreen() {
             value={book.notes}
             onChangeText={(notes) => updateBook(book.id, { notes })}
             placeholder="どんな本だった？"
-            placeholderTextColor={palette.textMuted}
+            placeholderTextColor={palette.textFaint}
             multiline
             textAlignVertical="top"
           />
@@ -128,7 +132,7 @@ const styles = StyleSheet.create({
     backgroundColor: palette.background,
   },
   content: {
-    padding: 20,
+    padding: 24,
     paddingBottom: 60,
   },
   notFound: {
@@ -138,37 +142,53 @@ const styles = StyleSheet.create({
   },
   coverArea: {
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   cover: {
-    width: 130,
-    height: 190,
-    borderRadius: 4,
+    width: 132,
+    height: 192,
+    borderRadius: 3,
     justifyContent: 'center',
-    padding: 10,
     shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 4,
+    shadowOpacity: 0.6,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
+  },
+  coverPlaceholderFrame: {
+    flex: 1,
+    margin: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,248,230,0.35)',
+    justifyContent: 'center',
+    padding: 8,
   },
   coverPlaceholderText: {
-    color: 'rgba(255,255,255,0.95)',
+    color: 'rgba(255,250,238,0.95)',
     fontSize: 14,
     fontWeight: '700',
     textAlign: 'center',
+    letterSpacing: 1,
   },
   title: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 21,
     color: palette.text,
+    fontFamily: serifFont,
+    fontWeight: '600',
     textAlign: 'center',
+    lineHeight: 30,
   },
   authors: {
-    fontSize: 14,
+    fontSize: 13,
     color: palette.textMuted,
     textAlign: 'center',
-    marginTop: 4,
+    marginTop: 6,
+    letterSpacing: 1,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: palette.cardBorder,
+    marginTop: 22,
   },
   section: {
     marginTop: 24,
@@ -183,18 +203,20 @@ const styles = StyleSheet.create({
     paddingRight: 12,
   },
   label: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: palette.text,
-    marginBottom: 6,
+    fontSize: 12,
+    color: palette.accent,
+    letterSpacing: 2,
+    marginBottom: 8,
   },
   hint: {
-    fontSize: 12,
-    color: palette.textMuted,
+    fontSize: 11,
+    color: palette.textFaint,
   },
   monthInput: {
     backgroundColor: palette.card,
-    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: palette.cardBorder,
+    borderRadius: 4,
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 16,
@@ -203,19 +225,23 @@ const styles = StyleSheet.create({
   },
   notesInput: {
     backgroundColor: palette.card,
-    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: palette.cardBorder,
+    borderRadius: 4,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 15,
+    lineHeight: 24,
     color: palette.text,
-    minHeight: 120,
+    minHeight: 130,
   },
   deleteButton: {
-    marginTop: 36,
+    marginTop: 40,
     alignSelf: 'center',
   },
   deleteButtonText: {
-    color: '#B3372F',
-    fontWeight: '600',
+    color: palette.danger,
+    fontSize: 13,
+    letterSpacing: 1,
   },
 });
