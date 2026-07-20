@@ -2,7 +2,6 @@ import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
 import {
-  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -16,6 +15,7 @@ import {
 } from 'react-native';
 import { palette, serifFont } from '../colors';
 import Stars from '../components/Stars';
+import { confirmDestructive } from '../dialogs';
 import { RootStackParamList } from '../navigation';
 import { useBooks } from '../store';
 
@@ -37,18 +37,19 @@ export default function BookDetailScreen() {
   }
 
   const onDelete = () => {
-    Alert.alert('本棚から削除', `「${book.title}」を本棚から削除しますか？`, [
-      { text: 'キャンセル', style: 'cancel' },
-      {
-        text: '削除',
-        style: 'destructive',
-        onPress: () => {
-          removeBook(book.id);
-          navigation.goBack();
-        },
+    confirmDestructive({
+      title: '本棚から削除',
+      message: `「${book.title}」を本棚から削除しますか？`,
+      actionLabel: '削除',
+      onConfirm: () => {
+        removeBook(book.id);
+        navigation.goBack();
       },
-    ]);
+    });
   };
+
+  const monthInvalid =
+    !!book.finishedAt && !/^\d{4}-(0[1-9]|1[0-2])$/.test(book.finishedAt);
 
   return (
     <KeyboardAvoidingView
@@ -96,13 +97,19 @@ export default function BookDetailScreen() {
         <View style={styles.section}>
           <Text style={styles.label}>読んだ月</Text>
           <TextInput
-            style={styles.monthInput}
+            style={[styles.monthInput, monthInvalid && styles.monthInputInvalid]}
             value={book.finishedAt ?? ''}
-            onChangeText={(finishedAt) => updateBook(book.id, { finishedAt })}
+            onChangeText={(v) =>
+              updateBook(book.id, { finishedAt: v.replace(/[^0-9-]/g, '').slice(0, 7) })
+            }
             placeholder="2026-07"
             placeholderTextColor={palette.textFaint}
             keyboardType="numbers-and-punctuation"
+            maxLength={7}
           />
+          {monthInvalid && (
+            <Text style={styles.monthWarning}>「2026-07」の形式で入力すると記録に集計されます</Text>
+          )}
         </View>
 
         <View style={styles.section}>
@@ -211,6 +218,14 @@ const styles = StyleSheet.create({
   hint: {
     fontSize: 11,
     color: palette.textFaint,
+  },
+  monthInputInvalid: {
+    borderColor: palette.danger,
+  },
+  monthWarning: {
+    color: palette.danger,
+    fontSize: 11,
+    marginTop: 6,
   },
   monthInput: {
     backgroundColor: palette.card,

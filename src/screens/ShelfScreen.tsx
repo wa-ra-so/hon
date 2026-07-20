@@ -1,9 +1,10 @@
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { palette, serifFont } from '../colors';
 import Shelf from '../components/Shelf';
+import { notify } from '../dialogs';
 import { RootStackParamList } from '../navigation';
 import { shareShelf } from '../share';
 import { useBooks } from '../store';
@@ -16,11 +17,14 @@ export default function ShelfScreen() {
 
   const onShare = async () => {
     if (books.length === 0) {
-      Alert.alert('本棚が空です', '検索タブから読んだ本を追加してみましょう。');
+      notify('本棚が空です', '検索タブから読んだ本を追加してみましょう。');
       return;
     }
     try {
-      await shareShelf(books);
+      const result = await shareShelf(books);
+      if (result === 'copied') {
+        notify('共有リンクをコピーしました', 'そのまま貼り付けて本棚を見せられます。');
+      }
     } catch {
       // 共有キャンセル時は何もしない
     }
@@ -43,11 +47,6 @@ export default function ShelfScreen() {
           </Pressable>
         </View>
       </View>
-      {books.length === 0 && (
-        <Text style={styles.empty}>
-          まだ本がありません。{'\n'}検索タブから読んだ本を迎え入れると、ここに並んでいきます。
-        </Text>
-      )}
       <Shelf
         books={books}
         onPressBook={(book) => navigation.navigate('BookDetail', { bookId: book.id })}
@@ -106,12 +105,5 @@ const styles = StyleSheet.create({
     color: palette.accent,
     fontSize: 13,
     letterSpacing: 2,
-  },
-  empty: {
-    color: palette.textMuted,
-    paddingHorizontal: 20,
-    paddingBottom: 10,
-    lineHeight: 22,
-    fontSize: 13,
   },
 });

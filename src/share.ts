@@ -1,4 +1,4 @@
-import { Share } from 'react-native';
+import { Platform, Share } from 'react-native';
 import { Book } from './types';
 
 /**
@@ -74,10 +74,22 @@ export function buildShareUrl(books: Book[]): string {
   return `${VIEWER_URL}#b=${base64urlEncode(json)}`;
 }
 
-export async function shareShelf(books: Book[]): Promise<void> {
+/**
+ * 本棚を共有する。Webでは react-native-web の Share が使えない環境があるため、
+ * Web Share API → クリップボードの順にフォールバックする。
+ * 戻り値はどう共有されたか（'shared' = 共有シート表示, 'copied' = URLコピー）。
+ */
+export async function shareShelf(books: Book[]): Promise<'shared' | 'copied'> {
   const url = buildShareUrl(books);
-  await Share.share({
-    message: `わたしの本棚（${books.length}冊）\n${url}`,
-    url,
-  });
+  const message = `わたしの本棚（${books.length}冊）\n${url}`;
+  if (Platform.OS === 'web') {
+    if (typeof navigator.share === 'function') {
+      await navigator.share({ text: message, url });
+      return 'shared';
+    }
+    await navigator.clipboard.writeText(url);
+    return 'copied';
+  }
+  await Share.share({ message, url });
+  return 'shared';
 }

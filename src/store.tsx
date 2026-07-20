@@ -29,7 +29,10 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY)
       .then((raw) => {
-        if (raw) setBooks(JSON.parse(raw));
+        if (!raw) return;
+        const saved: Book[] = JSON.parse(raw);
+        // 読み込み完了前に追加された本を上書きしないようマージする
+        setBooks((prev) => [...saved, ...prev.filter((b) => !saved.some((s) => s.id === b.id))]);
       })
       .catch(() => {})
       .finally(() => {
@@ -41,7 +44,7 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!loadedRef.current) return;
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(books)).catch(() => {});
-  }, [books]);
+  }, [books, loaded]);
 
   const addBook = useCallback((book: Book) => {
     setBooks((prev) => [...prev, book]);

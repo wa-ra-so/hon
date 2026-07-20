@@ -39,7 +39,8 @@ function placeBook(book: Book, index: number): Placed {
 
 export default function Shelf({ books, onPressBook }: Props) {
   const { width: windowWidth } = useWindowDimensions();
-  const rowWidth = windowWidth - SIDE_PADDING * 2 - 16;
+  // 画面幅 − 外側余白 − 棚内側のpadding(10*2) − ケースの枠線(1*2)
+  const rowWidth = windowWidth - SIDE_PADDING * 2 - 22;
 
   const rows = useMemo(() => {
     const result: Placed[][] = [];
@@ -89,6 +90,13 @@ export default function Shelf({ books, onPressBook }: Props) {
                   )
                 )}
               </View>
+              {books.length === 0 && i === 0 && (
+                <View style={styles.emptyOverlay} pointerEvents="none">
+                  <Text style={styles.emptyText}>
+                    ここに最初の一冊を。{'\n'}「さがす」から読んだ本を迎え入れましょう。
+                  </Text>
+                </View>
+              )}
             </View>
             <LinearGradient
               colors={[palette.woodEdge, palette.wood, palette.woodDark]}
@@ -103,6 +111,10 @@ export default function Shelf({ books, onPressBook }: Props) {
 
 function SpineBook({ placed, onPress }: { placed: Placed; onPress: (b: Book) => void }) {
   const { book, width, height, lean } = placed;
+  // 収まらない題名は末尾を「…」にする（共有ビューワーと同じ見え方に揃える）
+  const maxChars = Math.max(4, Math.floor((height - 12 - 8 - (book.rating === 5 ? 14 : 0)) / 13));
+  const chars = [...book.title];
+  const shown = chars.length > maxChars ? [...chars.slice(0, maxChars - 1), '…'] : chars;
   return (
     <Pressable
       onPress={() => onPress(book)}
@@ -120,9 +132,7 @@ function SpineBook({ placed, onPress }: { placed: Placed; onPress: (b: Book) => 
       />
       {/* 天(上端)の小口 */}
       <View style={styles.spineTopEdge} />
-      <Text style={styles.spineText} numberOfLines={Math.max(4, Math.floor((height - 34) / 13))}>
-        {[...book.title].join('\n')}
-      </Text>
+      <Text style={styles.spineText}>{shown.join('\n')}</Text>
       {book.rating === 5 && <Text style={styles.spineStar}>★</Text>}
     </Pressable>
   );
@@ -188,6 +198,23 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 14,
+  },
+  emptyOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  emptyText: {
+    color: palette.textMuted,
+    fontSize: 13,
+    lineHeight: 24,
+    textAlign: 'center',
+    letterSpacing: 1,
   },
   shelfBooks: {
     flexDirection: 'row',

@@ -72,7 +72,8 @@ export default function SearchScreen() {
     navigation.navigate('BookDetail', { bookId: book.id });
   };
 
-  const addedTitles = new Set(books.map((b) => b.title));
+  // 本のIDは `${googleId}-${追加時刻}` なので、googleId 部分で追加済みか判定する
+  const isAdded = (result: SearchResult) => books.some((b) => b.id.startsWith(`${result.googleId}-`));
 
   return (
     <View style={styles.container}>
@@ -106,7 +107,7 @@ export default function SearchScreen() {
           ) : null
         }
         renderItem={({ item }) => {
-          const added = addedTitles.has(item.title);
+          const added = isAdded(item);
           return (
             <View style={styles.resultRow}>
               {item.coverUrl ? (
@@ -127,6 +128,7 @@ export default function SearchScreen() {
               </View>
               <Pressable
                 style={[styles.addButton, added && styles.addButtonDone]}
+                disabled={added}
                 onPress={() => onAdd(item)}
               >
                 <Text style={[styles.addButtonText, added && styles.addButtonTextDone]}>
