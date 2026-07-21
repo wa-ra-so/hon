@@ -4,9 +4,13 @@ import * as jpeg from 'jpeg-js';
  * 表紙画像(JPEG)から背表紙向けの代表色を抽出する。
  * 取得・解析に失敗した場合は null を返し、呼び出し側はフォールバック色を使う。
  */
+const FETCH_TIMEOUT_MS = 8000;
+
 export async function spineColorFromCover(url: string): Promise<string | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
-    const res = await fetch(url);
+    const res = await fetch(url, { signal: controller.signal });
     if (!res.ok) return null;
     const buf = new Uint8Array(await res.arrayBuffer());
     const { data, width, height } = jpeg.decode(buf, {
@@ -15,7 +19,10 @@ export async function spineColorFromCover(url: string): Promise<string | null> {
     });
     return dominantSpineColor(data, width, height);
   } catch {
+    // タイムアウト・CORS・非対応フォーマット等はすべてフォールバック色に委ねる
     return null;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
